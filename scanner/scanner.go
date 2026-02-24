@@ -8,6 +8,8 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/matinsp7/PortScanner/tcpsp"
 )
 
 type ScanType string
@@ -70,5 +72,8 @@ func (s *Scanner) Run() {
 }
 
 func (s *Scanner) scanPort(port int) {
-
+	switch s.ScanType {
+	case TCPConnect:
+		tcpsp.TcpConnectScan(s.Target, port, s.Timeout)
+	}
 }
