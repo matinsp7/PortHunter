@@ -3,12 +3,11 @@ package scanner
 import (
 	"context"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/matinsp7/PortScanner/model"
 	"github.com/matinsp7/PortScanner/tcpsp"
-	"github.com/matinsp7/PortScanner/udp"
+	"github.com/matinsp7/PortScanner/utils"
 )
 
 func Run(ctx context.Context, scanner *model.Scanner) {
@@ -17,37 +16,29 @@ func Run(ctx context.Context, scanner *model.Scanner) {
 		return
 	}
 
-	fmt.Println("Starting scan...")
-
-	ports := make(chan int, scanner.Workers)
-	var wg sync.WaitGroup
-
-	for i := 0; i < scanner.Workers; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for port := range ports {
-				scanPort(scanner, port)
-			}
-		}()
-	}
-
-	for p := scanner.StartPort; p <= scanner.EndPort; p++ {
-		ports <- p
-	}
-	close(ports)
-	wg.Wait()
-	fmt.Println("Scan completed.")
-}
-
-func scanPort(scanner *model.Scanner, port int) {
 	switch scanner.ScanType {
 	case model.TCPConnect:
-		tcpsp.TcpConnectScan(scanner.Target, port, scanner.Timeout)
+		utils.RunWorkers(scanner, tcpsp.TcpConnectScan)
+		// tcpsp.TcpConnectScan(scanner.Target, port, scanner.Timeout)
+	case model.TCPSYN:
+		tcpsp.TCPSynConnect(scanner)
 	case model.UDPScan:
-		udp.UdpScan(scanner.Target, port, scanner.Timeout)
+		// udp.UdpScan(scanner.Target, port, scanner.Timeout)
 	}
+
+	// printResults()
 }
+
+// func scanPort(scanner *model.Scanner, port int) {
+// 	switch scanner.ScanType {
+// 	case model.TCPConnect:
+// 		tcpsp.TcpConnectScan(scanner.Target, port, scanner.Timeout)
+// 	case model.TCPSYN:
+// 		tcpsp.TCPSynConnect(scanner)
+// 	case model.UDPScan:
+// 		udp.UdpScan(scanner.Target, port, scanner.Timeout)
+// 	}
+// }
 
 func scanvalidation(scanner *model.Scanner) error {
 	if scanner.StartPort < 1 || scanner.EndPort > 65535 {
@@ -61,3 +52,4 @@ func scanvalidation(scanner *model.Scanner) error {
 	}
 	return nil
 }
+

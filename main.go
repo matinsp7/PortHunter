@@ -14,7 +14,7 @@ import (
 func main() {
 	target := flag.String("target", "", "Target IP address")
 	portRange := flag.String("ports", "1-1024", "Port range (e.g., 1-1000)")
-	scanType := flag.String("scan", "connect", "Scan type: connect, syn, fin, null, xmas, synack, udp")
+	scanType := flag.String("scan", "connect", "Scan type: connect, syn, fin, udp")
 	timeout := flag.Int("timeout", 3, "Timeout in seconds")
 	workers := flag.Int("workers", 200, "Number of concurrent workers")
 	sourcePort := flag.Int("sport", 0, "Custom source port (optional)")
@@ -25,16 +25,22 @@ func main() {
 		log.Fatal("Target IP is required")
 	}
 
+	ip, err := utils.ResolveTarget(*target)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	startPort, endPort := utils.ParsePortRange(*portRange)
 
 	scannerModel := &model.Scanner{
 		SourcePort: *sourcePort,
-		Target:     *target,
+		Target:     ip,
 		StartPort:  startPort,
 		EndPort:    endPort,
 		ScanType:   model.ScanType(*scanType),
 		Timeout:    time.Duration(*timeout) * time.Second,
 		Workers:    *workers,
+		Result: make(map[int]model.PortState),
 	}
 
 	ctx := context.Background()

@@ -3,14 +3,18 @@ package tcpsp
 import (
 	"fmt"
 	"net"
-	"time"
+
+	"github.com/matinsp7/PortScanner/model"
 )
 
-func TcpConnectScan(target string, port int, timeout time.Duration) {
-	address := fmt.Sprintf("%s:%d", target, port)
-	conn, err := net.DialTimeout("tcp", address, timeout)
+func TcpConnectScan(scanner *model.Scanner, port int) {
+	address := fmt.Sprintf("%s:%d", scanner.Target, port)
+	conn, err := net.DialTimeout("tcp", address, scanner.Timeout)
 	if err == nil {
-		fmt.Printf("[OPEN] TCP %d\n", port)
+		// fmt.Printf("[OPEN] TCP %d\n", port)
+		scanner.Mutex.Lock()
+		scanner.Result[port] = model.Open
+		scanner.Mutex.Unlock()
 		conn.Close()
 	}
 }
