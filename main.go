@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"time"
 
@@ -36,7 +35,5 @@ func main() {
 		SourcePort: uint16(*sourcePort),
 	}
 
-	fmt.Println("Starting scan...")
 	scanner.Run()
-	fmt.Println("Scan completed.")
 }
