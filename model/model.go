@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 )
 
@@ -38,5 +39,6 @@ type Scanner struct {
 	Timeout    time.Duration
 	Workers    int
 	Mutex      sync.Mutex
+	PortMap    map[layers.TCPPort]int
 	Result     map[int]PortState
 }

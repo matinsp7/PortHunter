@@ -217,10 +217,10 @@ func RunWorkers(scanner *model.Scanner, scanPort func(*model.Scanner, int)) {
 	wg.Wait()
 	printResults(scanner)
 	fmt.Println("Scan completed.")
+	os.Exit(0)
 }
 
 func printResults(scanner *model.Scanner) {
-	fmt.Println("res:")
 	for port, state := range scanner.Result {
 		if state == model.Open {
 			fmt.Println("[OPEN] Port", port)

@@ -3,7 +3,7 @@ package tcpsp
 import (
 	"fmt"
 	"log"
-	"math/rand/v2"
+	"math/rand"
 	"net"
 
 	"github.com/google/gopacket"
@@ -13,53 +13,50 @@ import (
 	"github.com/matinsp7/PortScanner/utils"
 )
 
-func TCPSynConnect(scanner *model.Scanner) {
-	iface, err := utils.GetActiveInterface()
+func TCPSynConnect(scannere *model.Scanner) {
+
+	device, err := utils.GetActiveInterface()
 	if err != nil {
-		log.Println(err)
-		return
+		log.Fatal(err)
 	}
 
-	handle, err := pcap.OpenLive(iface, 65535, true, pcap.BlockForever)
+	handle, err := pcap.OpenLive(device, 65535, true, pcap.BlockForever)
 	if err != nil {
-		log.Println(err)
-		return
+		log.Fatal(err)
 	}
-	scanner.Handle = handle
-	defer scanner.Handle.Close()
+	scannere.Handle = handle
+	defer scannere.Handle.Close()
 
-	srcIP, srcMAC, subnet := utils.GetInterfaceInfo(iface)
+	srcIP, srcMAC, subnet := utils.GetInterfaceInfo(device)
 
 	var nextHop net.IP
-	if utils.InSubnet(scanner.Target, subnet) {
-		nextHop = scanner.Target
+	if utils.InSubnet(scannere.Target, subnet) {
+		nextHop = scannere.Target
 		fmt.Println("Target is inside subnet")
 	} else {
-		nextHop = utils.GetDefaultGateway(iface)
+		nextHop = utils.GetDefaultGateway(device)
 		fmt.Println("Target outside subnet → using gateway:", nextHop)
 	}
 
-	scanner.DstMAC = utils.ResolveARP(scanner.Handle, srcIP, srcMAC, nextHop)
+	dstMAC := utils.ResolveARP(scannere.Handle, srcIP, srcMAC, nextHop)
 
-	filter := fmt.Sprintf("tcp and host %s or icmp", scanner.Target)
-	scanner.Handle.SetBPFFilter(filter)
+	scannere.SrcIP = srcIP
+	scannere.SrcMAC = srcMAC
+	scannere.DstMAC = dstMAC
+	scannere.PortMap = make(map[layers.TCPPort]int)
 
-	go listen(scanner)
+	filter := fmt.Sprintf("tcp and host %s or icmp", scannere.Target)
+	scannere.Handle.SetBPFFilter(filter)
+	go listen(scannere)
 
-	utils.RunWorkers(scanner, sendSYN)
-
+	utils.RunWorkers(scannere, sendSYN)
 }
 
 func listen(scanner *model.Scanner) {
 
-	fmt.Println("packet:")
-
-
 	ps := gopacket.NewPacketSource(scanner.Handle, scanner.Handle.LinkType())
 
 	for packet := range ps.Packets() {
-
-		fmt.Println("packet:", packet)
 
 		if tcpLayer := packet.Layer(layers.LayerTypeTCP); tcpLayer != nil {
 
@@ -67,13 +64,25 @@ func listen(scanner *model.Scanner) {
 
 			scanner.Mutex.Lock()
 
-			if tcp.SYN && tcp.ACK {
-				scanner.Result[int(tcp.SrcPort)] = model.Open
-				sendRST(scanner, tcp)
-			} else if tcp.RST {
-				scanner.Result[int(tcp.SrcPort)] = model.Closed
+			originalPort, exists := scanner.PortMap[tcp.DstPort]
+			if !exists {
+				scanner.Mutex.Unlock()
+				continue
 			}
 
+			if tcp.SYN && tcp.ACK {
+				scanner.Result[originalPort] = model.Open
+				sendRST(scanner, tcp)
+			} else if tcp.RST {
+				scanner.Result[originalPort] = model.Closed
+			}
+
+			scanner.Mutex.Unlock()
+		}
+
+		if icmpLayer := packet.Layer(layers.LayerTypeICMPv4); icmpLayer != nil {
+			scanner.Mutex.Lock()
+			scanner.Result[int(scanner.StartPort)] = model.Filtered
 			scanner.Mutex.Unlock()
 		}
 	}
@@ -95,6 +104,9 @@ func sendSYN(scanner *model.Scanner, port int) {
 	}
 
 	srcPort := layers.TCPPort(40000 + port)
+	scanner.Mutex.Lock()
+	scanner.PortMap[srcPort] = port
+	scanner.Mutex.Unlock()
 
 	tcp := &layers.TCP{
 		SrcPort: srcPort,
@@ -109,18 +121,8 @@ func sendSYN(scanner *model.Scanner, port int) {
 	sendPacket(scanner, eth, ip, tcp)
 }
 
-func sendPacket(scanner *model.Scanner, layersToSend ...gopacket.SerializableLayer) {
-	buffer := gopacket.NewSerializeBuffer()
-	opts := gopacket.SerializeOptions{
-		FixLengths:       true,
-		ComputeChecksums: true,
-	}
-
-	gopacket.SerializeLayers(buffer, opts, layersToSend...)
-	scanner.Handle.WritePacketData(buffer.Bytes())
-}
-
 func sendRST(scanner *model.Scanner, received *layers.TCP) {
+
 	eth := &layers.Ethernet{
 		SrcMAC:       scanner.SrcMAC,
 		DstMAC:       scanner.DstMAC,
@@ -145,4 +147,16 @@ func sendRST(scanner *model.Scanner, received *layers.TCP) {
 	tcp.SetNetworkLayerForChecksum(ip)
 
 	sendPacket(scanner, eth, ip, tcp)
+}
+
+func sendPacket(scanner *model.Scanner, layersToSend ...gopacket.SerializableLayer) {
+
+	buffer := gopacket.NewSerializeBuffer()
+	opts := gopacket.SerializeOptions{
+		FixLengths:       true,
+		ComputeChecksums: true,
+	}
+
+	gopacket.SerializeLayers(buffer, opts, layersToSend...)
+	scanner.Handle.WritePacketData(buffer.Bytes())
 }
