@@ -4,22 +4,22 @@ import (
 	"fmt"
 	"net"
 	"time"
+	"github.com/matinsp7/PortScanner/model"
 )
 
-func UdpScan(target string, port int, timeout time.Duration) {
+func UdpScan(scanner *model.Scanner, port int) {
 	
-	address := fmt.Sprintf("%s:%d", target, port)
+	address := fmt.Sprintf("%s:%d", scanner.Target , port)
 
 	
-
-	conn, err := net.DialTimeout("udp", address, timeout)
+	conn, err := net.DialTimeout("udp", address, scanner.Timeout)
 	if err != nil {
 		fmt.Printf("UDP %d: closed (dial error)\n", port)
 		return
 	}
 	defer conn.Close()
 
-	conn.SetDeadline(time.Now().Add(timeout))
+	conn.SetDeadline(time.Now().Add(scanner.Timeout))
 
 	var payload []byte 
 
@@ -51,13 +51,19 @@ func UdpScan(target string, port int, timeout time.Duration) {
 	if err != nil {
 		netErr, ok := err.(net.Error)
 		if ok && netErr.Timeout() {
-			fmt.Printf("UDP %d: open|filter\n", port)
+			scanner.Mutex.Lock()
+			scanner.Result[port]=model.Filtered
+			scanner.Mutex.Unlock()
 			return
 		}
-
-		fmt.Printf("[close] UDP %d \n", port)
+        
+		scanner.Mutex.Lock()
+		scanner.Result[port] = model.Closed
+		scanner.Mutex.Unlock()
 		return
 	}
-
-	fmt.Printf("[open] UDP %d \n", port)
+     
+	 scanner.Mutex.Lock()
+	 scanner.Result[port]= model.Open
+	 scanner.Mutex.Unlock()
 }

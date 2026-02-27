@@ -43,6 +43,7 @@ func ResolveTarget(target string) (net.IP, error) {
 	return ips[0].To4(), nil
 }
 
+
 func GetActiveInterface() (string, error) {
 	devices, err := pcap.FindAllDevs()
 	if err != nil {
@@ -223,7 +224,7 @@ func RunWorkers(scanner *model.Scanner, scanPort func(*model.Scanner, int)) {
 func printResults(scanner *model.Scanner) {
 	for port, state := range scanner.Result {
 		if state == model.Open {
-			fmt.Println("[OPEN] Port", port)
-		}
+			fmt.Println("[OPEN] Port", port , ":" , model.Port_service[port])
+		} 
 	}
 }

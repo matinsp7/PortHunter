@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/matinsp7/PortScanner/utils"
 	"github.com/matinsp7/PortScanner/model"
 	"github.com/matinsp7/PortScanner/tcpsp"
-	"github.com/matinsp7/PortScanner/utils"
+	"github.com/matinsp7/PortScanner/udp"
+	
 )
 
 func Run(ctx context.Context, scanner *model.Scanner) {
@@ -23,6 +25,7 @@ func Run(ctx context.Context, scanner *model.Scanner) {
 	case model.TCPSYN:
 		tcpsp.TCPSynConnect(scanner)
 	case model.UDPScan:
+		utils.RunWorkers(scanner , udp.UdpScan)
 		// udp.UdpScan(scanner.Target, port, scanner.Timeout)
 	}
 

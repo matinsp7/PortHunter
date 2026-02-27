@@ -17,6 +17,15 @@ const (
 	UDPScan    ScanType = "udp"
 )
 
+var Port_service = map[int]string {
+	21 : "FTP" ,
+	22:  "SSH",
+    53 : "DNS" ,
+	80 : "HTTP" ,
+	123 : "NTP" ,
+	443 : "HTTPS" ,
+}
+
 type PortState int
 
 const (
@@ -25,6 +34,7 @@ const (
 	Closed
 	Filtered
 )
+
 
 type Scanner struct {
 	SrcIP      net.IP
