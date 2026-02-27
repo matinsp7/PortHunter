@@ -16,7 +16,7 @@ It allows you to scan a target IP address and discover open ports along with the
 
 ---
 
-## 🛠️ Installation
+## 🛠️ Installation (Linux)
 
 Prerequisites
 
@@ -44,6 +44,7 @@ Install Globally:
 make install
 ```
 
+> Note that you can use golang compiler commands like "go run" or others in the cmd/portscanner path. 
 ---
 
 ## ⚙️ Usage

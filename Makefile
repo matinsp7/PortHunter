@@ -10,8 +10,9 @@ build:
 run:
 	go run $(CMD_PATH)
 
-install: buil
-	tidy
+install: build
+	go mod tidy
+	go build -o $(APP_NAME) $(CMD_PATH)
 	sudo mv $(APP_NAME) $(INSTALL_PATH)/$(APP_NAME)
 	@echo "$(APP_NAME) installed successfully in $(INSTALL_PATH)"
 
