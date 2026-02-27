@@ -20,9 +20,12 @@ const (
 var Port_service = map[int]string {
 	21 : "FTP" ,
 	22:  "SSH",
+	23:    "Telnet",
+	25:    "SMTP",
     53 : "DNS" ,
 	80 : "HTTP" ,
 	123 : "NTP" ,
+	143:   "IMAP",
 	443 : "HTTPS" ,
 }
 
