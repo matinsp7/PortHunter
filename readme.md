@@ -112,20 +112,6 @@ The scanner maps common ports to known services:
 
 ---
 
-
-## 📦 Project Structure
-
-```
-.
-├── main.go
-├── model/
-│   └── model.go
-├── scanner/
-├── utils/
-```
-
----
-
 ## ⚠️ Disclaimer
 
 This tool is intended for educational purposes and authorized security testing only.
@@ -136,7 +122,5 @@ Do not scan systems without proper permission.
 ## 📄 License
 
 This project is licensed under the MIT License — see the LICENSE file for details.
-
----
 
 ---
