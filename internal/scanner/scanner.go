@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/matinsp7/PortScanner/model"
+	"github.com/matinsp7/PortScanner/internal/model"
 )
 
 func Run(ctx context.Context, scanner *model.Scanner) {

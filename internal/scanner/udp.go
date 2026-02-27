@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 	"time"
-	"github.com/matinsp7/PortScanner/model"
+	"github.com/matinsp7/PortScanner/internal/model"
 )
 
 func udpScan(scanner *model.Scanner, port int) {

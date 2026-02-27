@@ -6,17 +6,17 @@ import (
 	"log"
 	"time"
 
-	"github.com/matinsp7/PortScanner/model"
-	"github.com/matinsp7/PortScanner/scanner"
-	"github.com/matinsp7/PortScanner/utils"
+	"github.com/matinsp7/PortScanner/internal/model"
+	"github.com/matinsp7/PortScanner/internal/scanner"
+	"github.com/matinsp7/PortScanner/internal/utils"
 )
 
 func main() {
 	target := flag.String("target", "", "Target IP address")
 	portRange := flag.String("ports", "1-1024", "Port range (e.g., 1-1000)")
 	scanType := flag.String("scan", "connect", "Scan type: connect, syn, udp")
-	timeout := flag.Int("timeout", 3, "Timeout in seconds")
-	workers := flag.Int("workers", 200, "Number of concurrent workers")
+	timeout := flag.Int("timeout", 3, "Timeout in seconds [1-60]")
+	workers := flag.Int("workers", 200, "Number of concurrent workers [1-1000]")
 
 	flag.Parse()
 

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/matinsp7/PortScanner/model"
+	"github.com/matinsp7/PortScanner/internal/model"
 )
 
 func RunWorkers(scanner *model.Scanner, scanPort func(*model.Scanner, int)) {

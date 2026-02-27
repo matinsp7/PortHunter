@@ -9,8 +9,8 @@ import (
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
-	"github.com/matinsp7/PortScanner/model"
-	"github.com/matinsp7/PortScanner/utils"
+	"github.com/matinsp7/PortScanner/internal/model"
+	"github.com/matinsp7/PortScanner/internal/utils"
 )
 
 func tcpSynConnect(scanner *model.Scanner) {

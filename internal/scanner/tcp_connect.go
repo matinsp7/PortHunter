@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/matinsp7/PortScanner/model"
+	"github.com/matinsp7/PortScanner/internal/model"
 )
 
 func tcpConnectScan(scanner *model.Scanner, port int) {
