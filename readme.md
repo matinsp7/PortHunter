@@ -96,22 +96,6 @@ sudo go run main.go -target 192.168.1.1 -scan udp -ports 20-200
 
 ---
 
-## 🌐 Detected Common Services
-
-The scanner maps common ports to known services:
-
-* 21 → FTP
-* 22 → SSH
-* 23 → Telnet
-* 25 → SMTP
-* 53 → DNS
-* 80 → HTTP
-* 123 → NTP
-* 143 → IMAP
-* 443 → HTTPS
-
----
-
 ## ⚠️ Disclaimer
 
 This tool is intended for educational purposes and authorized security testing only.
