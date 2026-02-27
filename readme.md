@@ -1,9 +1,9 @@
-# 🚀 PortHunter
+# PortHunter
 
 A fast and concurrent port scanner written in Go.
 It allows you to scan a target IP address and discover open ports along with their associated services.
 
-## ✨ Features
+## Features
 
 * TCP Connect Scan
 * TCP SYN Scan (Half-Open Scan)
@@ -18,31 +18,40 @@ It allows you to scan a target IP address and discover open ports along with the
 
 ## 🛠️ Installation
 
-Make sure you have Go installed:
+Prerequisites
+
+* Go 1.20+
+* make
+* Root privileges (required for SYN and UDP scans)
+
+Verify installation:
 
 ```bash
 go version
+make --version
 ```
 
 Clone the repository:
 
 ```bash
-git clone https://github.com/matinsp7/PortScanner.git
+git clone https://github.com/matinsp7/PortHunter.git.git
 cd PortHunter
 ```
 
-Install dependencies:
+Install Globally:
 
 ```bash
-go mod tidy
+make install
 ```
 
 ---
 
 ## ⚙️ Usage
 
+After installation, you can run:
+
 ```bash
-go run main.go -target <IP> [options]
+porthunter -target <IP> [options]
 ```
 
 ### Required Argument
@@ -62,31 +71,31 @@ go run main.go -target <IP> [options]
 
 ---
 
-## 📌 Example
+## Example
 
 ### TCP Connect Scan
 
 ```bash
-go run main.go -target 192.168.1.1
+porthunter -target 192.168.1.1
 ```
 
 ### SYN Scan
 
 ```bash
-sudo go run main.go -target 192.168.1.1 -scan syn
+sudo porthunter -target 192.168.1.1 -scan syn
 ```
 
 ### UDP Scan on Custom Ports
 
 ```bash
-sudo go run main.go -target 192.168.1.1 -scan udp -ports 20-200
+sudo porthunter -target 192.168.1.1 -scan udp -ports 20-200
 ```
 
 > ⚠️ SYN and UDP scans usually require root privileges.
 
 ---
 
-## 🔎 Supported Scan Types
+## Supported Scan Types
 
 | Scan Type | Description                           |
 | --------- | ------------------------------------- |
@@ -96,7 +105,14 @@ sudo go run main.go -target 192.168.1.1 -scan udp -ports 20-200
 
 ---
 
-## ⚠️ Disclaimer
+## Uninstall
+
+```bash
+make uninstall
+```
+
+---
+## Disclaimer
 
 This tool is intended for educational purposes and authorized security testing only.
 Do not scan systems without proper permission.
