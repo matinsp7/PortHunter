@@ -1,4 +1,4 @@
-package tcpsp
+package scanner
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/matinsp7/PortScanner/model"
 )
 
-func TcpConnectScan(scanner *model.Scanner, port int) {
+func tcpConnectScan(scanner *model.Scanner, port int) {
 	address := fmt.Sprintf("%s:%d", scanner.Target, port)
 	conn, err := net.DialTimeout("tcp", address, scanner.Timeout)
 	if err == nil {

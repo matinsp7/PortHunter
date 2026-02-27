@@ -1,4 +1,4 @@
-package tcpsp
+package scanner
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 	"github.com/matinsp7/PortScanner/utils"
 )
 
-func TCPSynConnect(scannere *model.Scanner) {
+func tcpSynConnect(scanner *model.Scanner) {
 
 	device, err := utils.GetActiveInterface()
 	if err != nil {
@@ -24,32 +24,32 @@ func TCPSynConnect(scannere *model.Scanner) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	scannere.Handle = handle
-	defer scannere.Handle.Close()
+	scanner.Handle = handle
+	defer scanner.Handle.Close()
 
 	srcIP, srcMAC, subnet := utils.GetInterfaceInfo(device)
 
 	var nextHop net.IP
-	if utils.InSubnet(scannere.Target, subnet) {
-		nextHop = scannere.Target
+	if utils.InSubnet(scanner.Target, subnet) {
+		nextHop = scanner.Target
 		fmt.Println("Target is inside subnet")
 	} else {
 		nextHop = utils.GetDefaultGateway(device)
 		fmt.Println("Target outside subnet → using gateway:", nextHop)
 	}
 
-	dstMAC := utils.ResolveARP(scannere.Handle, srcIP, srcMAC, nextHop)
+	dstMAC := utils.ResolveARP(scanner.Handle, srcIP, srcMAC, nextHop)
 
-	scannere.SrcIP = srcIP
-	scannere.SrcMAC = srcMAC
-	scannere.DstMAC = dstMAC
-	scannere.PortMap = make(map[layers.TCPPort]int)
+	scanner.SrcIP = srcIP
+	scanner.SrcMAC = srcMAC
+	scanner.DstMAC = dstMAC
+	scanner.PortMap = make(map[layers.TCPPort]int)
 
-	filter := fmt.Sprintf("tcp and host %s or icmp", scannere.Target)
-	scannere.Handle.SetBPFFilter(filter)
-	go listen(scannere)
+	filter := fmt.Sprintf("tcp and host %s or icmp", scanner.Target)
+	scanner.Handle.SetBPFFilter(filter)
+	go listen(scanner)
+	runWorkers(scanner, sendSYN)
 
-	utils.RunWorkers(scannere, sendSYN)
 }
 
 func listen(scanner *model.Scanner) {

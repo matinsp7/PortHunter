@@ -1,4 +1,4 @@
-package udp
+package scanner
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/matinsp7/PortScanner/model"
 )
 
-func UdpScan(scanner *model.Scanner, port int) {
+func udpScan(scanner *model.Scanner, port int) {
 	
 	address := fmt.Sprintf("%s:%d", scanner.Target , port)
 

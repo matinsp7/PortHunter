@@ -41,7 +41,6 @@ const (
 
 type Scanner struct {
 	SrcIP      net.IP
-	SourcePort int
 	SrcMAC     net.HardwareAddr
 	DstMAC     net.HardwareAddr
 	Target     net.IP

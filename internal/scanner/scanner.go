@@ -3,13 +3,11 @@ package scanner
 import (
 	"context"
 	"fmt"
+	"os"
+	"sync"
 	"time"
 
-	"github.com/matinsp7/PortScanner/utils"
 	"github.com/matinsp7/PortScanner/model"
-	"github.com/matinsp7/PortScanner/tcpsp"
-	"github.com/matinsp7/PortScanner/udp"
-	
 )
 
 func Run(ctx context.Context, scanner *model.Scanner) {
@@ -20,28 +18,13 @@ func Run(ctx context.Context, scanner *model.Scanner) {
 
 	switch scanner.ScanType {
 	case model.TCPConnect:
-		utils.RunWorkers(scanner, tcpsp.TcpConnectScan)
-		// tcpsp.TcpConnectScan(scanner.Target, port, scanner.Timeout)
+		runWorkers(scanner, tcpConnectScan)
 	case model.TCPSYN:
-		tcpsp.TCPSynConnect(scanner)
+		tcpSynConnect(scanner)
 	case model.UDPScan:
-		utils.RunWorkers(scanner , udp.UdpScan)
-		// udp.UdpScan(scanner.Target, port, scanner.Timeout)
+		runWorkers(scanner, udpScan)
 	}
-
-	// printResults()
 }
-
-// func scanPort(scanner *model.Scanner, port int) {
-// 	switch scanner.ScanType {
-// 	case model.TCPConnect:
-// 		tcpsp.TcpConnectScan(scanner.Target, port, scanner.Timeout)
-// 	case model.TCPSYN:
-// 		tcpsp.TCPSynConnect(scanner)
-// 	case model.UDPScan:
-// 		udp.UdpScan(scanner.Target, port, scanner.Timeout)
-// 	}
-// }
 
 func scanvalidation(scanner *model.Scanner) error {
 	if scanner.StartPort < 1 || scanner.EndPort > 65535 {
@@ -56,3 +39,37 @@ func scanvalidation(scanner *model.Scanner) error {
 	return nil
 }
 
+func runWorkers(scanner *model.Scanner, scanPort func(*model.Scanner, int)) {
+	fmt.Println("Starting scan...")
+
+	ports := make(chan int, scanner.Workers)
+	var wg sync.WaitGroup
+
+	for i := 0; i < scanner.Workers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for port := range ports {
+				scanPort(scanner, port)
+				time.Sleep(scanner.Timeout)
+			}
+		}()
+	}
+
+	for p := scanner.StartPort; p <= scanner.EndPort; p++ {
+		ports <- p
+	}
+	close(ports)
+	wg.Wait()
+	printResults(scanner)
+	fmt.Println("Scan completed.")
+	os.Exit(0)
+}
+
+func printResults(scanner *model.Scanner) {
+	for port, state := range scanner.Result {
+		if state == model.Open {
+			fmt.Println("[OPEN] Port", port, ":", model.Port_service[port])
+		}
+	}
+}

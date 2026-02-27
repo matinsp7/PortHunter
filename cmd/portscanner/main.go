@@ -17,7 +17,6 @@ func main() {
 	scanType := flag.String("scan", "connect", "Scan type: connect, syn, udp")
 	timeout := flag.Int("timeout", 3, "Timeout in seconds")
 	workers := flag.Int("workers", 200, "Number of concurrent workers")
-	sourcePort := flag.Int("sport", 0, "Custom source port (optional)")
 
 	flag.Parse()
 
@@ -33,7 +32,6 @@ func main() {
 	startPort, endPort := utils.ParsePortRange(*portRange)
 
 	scannerModel := &model.Scanner{
-		SourcePort: *sourcePort,
 		Target:     ip,
 		StartPort:  startPort,
 		EndPort:    endPort,
