@@ -8,7 +8,7 @@ build:
 	go build -o $(APP_NAME) $(CMD_PATH)
 
 run:
-	go run $(CMD_PATH)
+	go run $(CMD_PATH) $(ARGS)
 
 install: build
 	go mod tidy

@@ -13,7 +13,7 @@ import (
 
 func main() {
 	target := flag.String("target", "", "Target IP address")
-	portRange := flag.String("ports", "1-1024", "Port range (e.g., 1-1000)")
+	portRange := flag.String("ports", "1-1024", "Port range ")
 	scanType := flag.String("scan", "connect", "Scan type: connect, syn, udp")
 	timeout := flag.Int("timeout", 3, "Timeout in seconds [1-60]")
 	workers := flag.Int("workers", 200, "Number of concurrent workers [1-1000]")
